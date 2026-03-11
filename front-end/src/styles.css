@@ -1,0 +1,43 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import 'tailwindcss';
+
+:root {
+	--bg: #0a0c10;
+	--surface: #111318;
+	--surface2: #181c24;
+	--border: #1e2330;
+	--border2: #262d3d;
+	--accent: #00e5a0;
+	--accent2: #0095ff;
+	--warn: #ffb547;
+	--danger: #ff4560;
+	--text: #e8eaf0;
+	--text2: #8892a4;
+	--text3: #4a5568;
+}
+
+* {
+	box-sizing: border-box;
+}
+
+html,
+body {
+	margin: 0;
+	min-height: 100%;
+	background: var(--bg);
+	color: var(--text);
+	font-family: 'Syne', sans-serif;
+}
+
+body::before {
+	content: '';
+	position: fixed;
+	inset: 0;
+	pointer-events: none;
+	background-image:
+		linear-gradient(var(--border) 1px, transparent 1px),
+		linear-gradient(90deg, var(--border) 1px, transparent 1px);
+	background-size: 64px 64px;
+	opacity: 0.18;
+	z-index: -1;
+}

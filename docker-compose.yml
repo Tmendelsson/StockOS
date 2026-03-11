@@ -1,0 +1,53 @@
+version: '3.9'
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: stockos-db
+    environment:
+      POSTGRES_DB: stockos
+      POSTGRES_USER: stockos
+      POSTGRES_PASSWORD: stockos
+    ports:
+      - '5432:5432'
+    volumes:
+      - stockos_db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U stockos -d stockos']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ./back-end
+    container_name: stockos-backend
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PORT: 3000
+      NODE_ENV: development
+      DATABASE_URL: postgresql://stockos:stockos@db:5432/stockos?schema=public
+      JWT_SECRET: stockos_dev_secret_change_me
+    ports:
+      - '3000:3000'
+    volumes:
+      - ./back-end:/app
+      - /app/node_modules
+    command: sh -c "npm install; npm run prisma:generate; npm run dev"
+
+  frontend:
+    build:
+      context: ./front-end
+    container_name: stockos-frontend
+    depends_on:
+      - backend
+    ports:
+      - '4200:4200'
+    volumes:
+      - ./front-end:/app
+      - /app/node_modules
+    command: sh -c "npm install; npm start -- --host 0.0.0.0"
+
+volumes:
+  stockos_db_data:

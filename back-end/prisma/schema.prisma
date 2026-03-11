@@ -1,0 +1,82 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  ADMIN
+  MANAGER
+  OPERATOR
+}
+
+enum MovementType {
+  ENTRY
+  EXIT
+}
+
+model User {
+  id            String          @id @default(cuid())
+  name          String
+  email         String          @unique
+  password_hash String
+  role          UserRole        @default(OPERATOR)
+  movements     StockMovement[]
+  auditLogs     AuditLog[]
+  created_at    DateTime        @default(now())
+  updated_at    DateTime        @updatedAt
+
+  @@map("users")
+}
+
+model Product {
+  id              String          @id @default(cuid())
+  name            String
+  sku             String          @unique
+  category        String
+  description     String?
+  price           Decimal         @db.Decimal(12, 2)
+  minimum_stock   Int
+  current_stock   Int             @default(0)
+  is_active       Boolean         @default(true)
+  movements       StockMovement[]
+  created_at      DateTime        @default(now())
+  updated_at      DateTime        @updatedAt
+
+  @@map("products")
+}
+
+model StockMovement {
+  id         String       @id @default(cuid())
+  product_id String
+  type       MovementType
+  quantity   Int
+  reason     String?
+  user_id    String
+  product    Product      @relation(fields: [product_id], references: [id])
+  user       User         @relation(fields: [user_id], references: [id])
+  created_at DateTime     @default(now())
+
+  @@map("stock_movements")
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  user_id    String?
+  action     String
+  entity     String
+  entity_id  String
+  details    Json?
+  user       User?    @relation(fields: [user_id], references: [id])
+  created_at DateTime @default(now())
+
+  @@map("audit_logs")
+}
